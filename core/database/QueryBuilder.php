@@ -44,4 +44,20 @@ class QueryBuilder
             //
         }
     }
+
+    public function findBy($table, $column, $value)
+    {
+        $sql = sprintf(
+            'select * from %s where %s=%s;',
+            $table,
+            $column,
+            ':' . $column
+        );
+
+        $sth = $this->dbh->prepare($sql);
+        $sth->bindParam(':' . $column, $value);
+        $sth->execute();
+
+        return $sth->fetchAll(PDO::FETCH_OBJ);
+    }
 }

@@ -8,3 +8,11 @@
 
 $router->get('', 'PagesController#index');
 $router->post('', 'PagesController#create');
+
+$router->get('login', 'SessionsController#new');
+$router->post('login', 'SessionsController#create');
+
+$router->get('sign-up', 'SignupController#new');
+$router->post('sign-up', 'SignupController#create');
+
+$router->get('logout', 'SessionsController#destroy');

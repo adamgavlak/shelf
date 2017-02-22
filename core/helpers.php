@@ -36,3 +36,16 @@ function verify_csrf_token($csrf_token, $previous_csrf_token)
 function h($string) {
     return htmlspecialchars($string);
 }
+
+function current_user()
+{
+    if (array_key_exists('user_id', $_SESSION))
+    {
+        $user = \App\Core\App::get('db')->findBy('users', 'id', $_SESSION['user_id'])[0];
+        return $user;
+    }
+    else
+    {
+        return null;
+    }
+}

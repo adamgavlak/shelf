@@ -1,5 +1,7 @@
 <h1>Hello!</h1>
 
+Logged in as <?= current_user()->email ?> <a href="/logout">Log out</a>
+
 <table>
     <? foreach($users as $user) : ?>
         <tr>
