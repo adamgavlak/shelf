@@ -6,13 +6,16 @@
  * Time: 12:49
  */
 
-$router->get('', 'PagesController#index');
-$router->post('', 'PagesController#create');
+$router->get('/', 'PagesController#index');
+$router->post('/', 'PagesController#create');
 
-$router->get('login', 'SessionsController#new');
-$router->post('login', 'SessionsController#create');
+$router->get('/login', 'SessionsController#new');
+$router->post('/login', 'SessionsController#create');
 
-$router->get('sign-up', 'SignupController#new');
-$router->post('sign-up', 'SignupController#create');
+$router->get('/sign-up', 'SignupController#new');
+$router->post('/sign-up', 'SignupController#create');
 
 $router->get('logout', 'SessionsController#destroy');
+
+$router->get('/users', 'UserController#index');
+$router->get('/users/:id', 'UserController#show');

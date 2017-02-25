@@ -28,29 +28,31 @@ class Router
 
     public function get($uri, $controller)
     {
-        $this->routes['GET'][$uri] = $controller;
+        $this->routes['GET'][$this->parse_route($uri)] = $controller;
     }
 
     public function post($uri, $controller)
     {
-        $this->routes['POST'][$uri] = $controller;
+        $this->routes['POST'][$this->parse_route($uri)] = $controller;
     }
 
     public function direct($uri, $requestType)
     {
-        if ($requestType == 'POST')
-        {
+        if ($requestType == 'POST') {
             verify_csrf_token($_POST['_csrf_token'], Session::get('previous_csrf_token'));
         }
 
-        if (array_key_exists($uri, $this->routes[$requestType]))
-        {
-            return $this->callAction(
-                ...explode('#', $this->routes[$requestType][$uri])
-            );
-        }
+        $match = $this->match_key_in_array($uri, $this->routes[$requestType]);
+        $route = $match["route"];
 
-        throw new Exception('No route defined for this URI.');
+        if (empty($route))
+            throw new Exception('No route defined for this URI.');
+
+        Input::add($match["params"]);
+
+        return $this->callAction(
+            ...explode('#', $this->routes[$requestType][$route])
+        );
     }
 
     public function callAction($controller, $action)
@@ -58,11 +60,39 @@ class Router
         $controller = "App\\Controllers\\{$controller}";
         $controller = new $controller;
 
-        if (! method_exists($controller, $action))
-        {
+        if (!method_exists($controller, $action)) {
             throw new Exception("{$controller} does not have a {$action} action.");
         }
 
         return $controller->$action();
+    }
+
+    private function match_key_in_array($uri, $routes)
+    {
+        foreach ($routes as $key => $value)
+        {
+            if (preg_match("/^" . $key . "$/", $uri, $params)) {
+
+                foreach ($params as $k => $v) {
+                    if (is_int($k)) {
+                        unset($params[$k]);
+                    }
+                }
+
+                return ["route" => $key, "params" => $params];
+            }
+        }
+
+        return null;
+    }
+
+    private function parse_route($route)
+    {
+        $route = str_replace("/", "\/", $route);
+
+        $replace_params_regex = '/:(\w+)/';
+        $route = preg_replace($replace_params_regex, "(?<$1>.+)", $route);
+
+        return $route;
     }
 }

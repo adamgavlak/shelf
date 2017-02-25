@@ -12,31 +12,19 @@ use Exception;
 
 class Input
 {
-    protected static $data;
+    protected static $data = [];
+    protected static $method = 0; // INPUT_POST = 0, INPUT_GET = 1
 
     public static function process($requestType)
     {
         if ($requestType == 'GET')
-        {
-            $request = $_GET;
-        }
-        elseif ($requestType == 'POST')
-        {
-            $request = $_POST;
-        }
+            static::$method++;
 
-        $data = [];
+        $params = (static::$method == 0) ? $_POST : $_GET;
 
-        foreach ($request as $key => $value)
-        {
-            if ($requestType == 'GET') {
-                $data[$key] = filter_input(INPUT_GET, $key, FILTER_SANITIZE_SPECIAL_CHARS);
-            } elseif ($requestType == 'POST') {
-                $data[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_SPECIAL_CHARS);
-            }
+        foreach ($params as $key => $value) {
+            static::$data[$key] = filter_input(static::$method, $key, FILTER_SANITIZE_SPECIAL_CHARS);
         }
-
-        static::$data = $data;
     }
 
     public static function get($key)
@@ -51,5 +39,12 @@ class Input
     public static function all()
     {
         return static::$data;
+    }
+
+    public static function add($params)
+    {
+        foreach ($params as $key => $value) {
+            static::$data[$key] = filter_var($value, FILTER_SANITIZE_SPECIAL_CHARS);
+        }
     }
 }
